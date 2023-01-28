@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:habitz/model/habit.dart';
+import 'package:habitz/models/habit.dart';
+import 'package:habitz/state/habits.bloc.dart';
+
+import '../state/bloc_provider.dart';
 import '../widgets/bottom_part.dart';
+import '../widgets/habit_card.dart';
 
 class HabitsOverviewPage extends StatefulWidget {
 
@@ -35,6 +39,15 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
   @override
   Widget build(BuildContext context) {
 
+    HabitsBloc bloc = BlocProvider.of<HabitsBloc>(context);
+
+    List<Widget> cards = habits.map((Habit habit) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: HabitCard(habit.name, habit.times, habit.startedAt),
+      );
+    }).toList();
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -63,6 +76,7 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
               child: BottomPart(
                 child: ListView(
                   children: [
+                    ...cards,
                     Padding(
                         padding: const EdgeInsets.only(top: 24),
                         child: TextButton(
@@ -104,11 +118,18 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Padding(
+                            children: [
+                              const Padding(
                                 padding: EdgeInsets.only(right: 8.0),
                                 child: FaIcon(FontAwesomeIcons.plus),
                               ),
+                              StreamBuilder<String>(
+                                stream: bloc.foo,
+                                initialData: "nothing",
+                                builder: (context, snapshot) {
+                                  return Text(snapshot.data!);
+                                },
+                              )
                             ],
                           ),
                         )

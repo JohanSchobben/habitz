@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:habitz/state/bloc_provider.dart';
+import 'package:habitz/state/habits.bloc.dart';
 import 'content/habits_overview.dart';
 
 void main() {
@@ -37,7 +39,10 @@ class MyApp extends StatelessWidget {
               )
           )
       ),
-      home: const HabitsOverviewPage()
+      home: BlocProvider<HabitsBloc>(
+          bloc: HabitsBloc(),
+          child:
+      ),
     );
   }
 }
