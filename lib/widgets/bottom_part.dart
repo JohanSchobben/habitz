@@ -10,7 +10,11 @@ class BottomPart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    double width = screenWidth > 400 ? screenWidth * 0.7 : screenWidth;
+
     return Container(
+      width: width,
       decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(

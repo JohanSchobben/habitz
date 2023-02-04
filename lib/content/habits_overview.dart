@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:habitz/models/habit.dart';
-import 'package:habitz/state/habits.bloc.dart';
+import 'package:habitz/state/habits_bloc.dart';
+import 'package:habitz/widgets/habit_create_button.dart';
 
 import '../state/bloc_provider.dart';
 import '../widgets/bottom_part.dart';
@@ -19,17 +19,6 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
 
-  List<Habit> habits = [];
-
-  void addHabit() {
-    String name = nameController.text;
-    print(name);
-    setState(() {
-      habits = [...habits, Habit(name, 0, DateTime.now())];
-    });
-    nameController.text = "";
-  }
-
   @override
   void dispose(){
     nameController.dispose();
@@ -41,12 +30,57 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
 
     HabitsBloc bloc = BlocProvider.of<HabitsBloc>(context);
 
-    List<Widget> cards = habits.map((Habit habit) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
-        child: HabitCard(habit.name, habit.times, habit.startedAt),
-      );
-    }).toList();
+    var createButton = HabitCreateButton(
+        onPressed: () {
+          showDialog(
+              context: context,
+              useRootNavigator: true,
+
+              builder: (BuildContext context) {
+                return Dialog(
+
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 24.0),
+                          child: Text(
+                            "Nieuwe gewoonte toevoegen",
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                        ),
+
+                        Form(
+                          key: formKey,
+                          child: TextFormField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              labelText: "Naam",
+                              contentPadding: const EdgeInsets
+                                  .symmetric(
+                                  vertical: 8, horizontal: 12),
+                              focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.orange
+                                          .shade300)
+                              ),
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey.shade100)
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
+        }
+    );
+
 
     return Scaffold(
         appBar: AppBar(
@@ -61,80 +95,44 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
 
         backgroundColor: Colors.orange.shade100,
         body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
                 padding: const EdgeInsets.only(top: 0, bottom: 32),
                 child: Center(
                   child: Text(
                     "Gewoontes",
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context).textTheme.headlineLarge,
                   ),
                 )
             ),
             Expanded(
               child: BottomPart(
-                child: ListView(
-                  children: [
-                    ...cards,
-                    Padding(
-                        padding: const EdgeInsets.only(top: 24),
-                        child: TextButton(
-                          style: const ButtonStyle(
-                              foregroundColor: MaterialStatePropertyAll(Colors.brown),
-                              overlayColor: MaterialStatePropertyAll(Colors.white)
-                          ),
-                          onPressed: () {
-                            showDialog(context: context, builder: (BuildContext context){
-                              return AlertDialog(
-                                title: const Text("Nieuwe gewoonte"),
-                                content: Form(
-                                  key: formKey,
-                                  child: TextFormField(
-                                    controller: nameController,
-                                    decoration: InputDecoration(
-                                      labelText: "Naam",
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                                      focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.orange.shade300)
-                                      ),
-                                      border: OutlineInputBorder(
-                                          borderSide: BorderSide(color: Colors.grey.shade100)
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                actions: [
-                                  ElevatedButton(
-                                      onPressed: (){
-                                        addHabit();
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("aanmaken")
-                                  )
-                                ],
-                              );
-                            });
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(right: 8.0),
-                                child: FaIcon(FontAwesomeIcons.plus),
-                              ),
-                              StreamBuilder<String>(
-                                stream: bloc.foo,
-                                initialData: "nothing",
-                                builder: (context, snapshot) {
-                                  return Text(snapshot.data!);
-                                },
-                              )
-                            ],
-                          ),
-                        )
-                    )
-                  ],
+                child: StreamBuilder<List<Habit>>(
+                  stream: bloc.habits$,
+                  initialData: const [],
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data!.isEmpty) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text("Je hebt geen gewoontes"),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: createButton,
+                          )
+                        ],
+                      );
+                    }
+
+                    List<HabitCard> habits = snapshot.data!.map<HabitCard>((habit) => HabitCard(habit.name, habit.times, habit.startedAt)).toList();
+                    return ListView(
+                      children: [
+                        ...habits,
+                        createButton
+                      ],
+                    );
+                  },
                 ),
               ),
             )
@@ -143,3 +141,4 @@ class _HabitsOverviewPageState extends State<HabitsOverviewPage> {
     );
   }
 }
+

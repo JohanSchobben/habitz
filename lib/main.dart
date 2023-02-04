@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitz/state/bloc_provider.dart';
-import 'package:habitz/state/habits.bloc.dart';
+import 'package:habitz/state/habits_bloc.dart';
 import 'content/habits_overview.dart';
 
 void main() {
@@ -27,10 +27,15 @@ class MyApp extends StatelessWidget {
               bodyMedium: TextStyle(
                   color: Colors.brown.shade700
               ),
-              headlineMedium: TextStyle(
+              headlineLarge: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: Colors.brown.shade700
+              ),
+              headlineMedium: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Colors.brown.shade700
               ),
               headlineSmall: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -41,7 +46,7 @@ class MyApp extends StatelessWidget {
       ),
       home: BlocProvider<HabitsBloc>(
           bloc: HabitsBloc(),
-          child:
+          child: const  HabitsOverviewPage()
       ),
     );
   }
