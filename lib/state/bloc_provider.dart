@@ -4,29 +4,32 @@ abstract class Bloc {
   void dispose();
 }
 
-class BlocProvider<T extends Bloc> extends InheritedWidget {
+class BlocProvider<T extends Bloc> extends StatefulWidget {
   final T bloc;
+  final Widget child;
+
   const BlocProvider({
     super.key,
-    required super.child,
+    required this.child,
     required this.bloc,
   });
 
 
+  static T of<T extends Bloc>(BuildContext context) => context.findAncestorWidgetOfExactType<BlocProvider<T>>()!.bloc;
 
   @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
-    return false;
+  State<StatefulWidget> createState() => _BlocProviderState<T>();
+}
+
+class _BlocProviderState<T> extends State<BlocProvider<Bloc>> {
+  @override
+  void dispose() {
+    widget.bloc.dispose();
+    super.dispose();
   }
 
-  static T of<T extends Bloc>(BuildContext context) {
-    var bloc = context.dependOnInheritedWidgetOfExactType<BlocProvider<T>>()?.bloc;
-    if (bloc == null){
-      throw Error();
-    } else {
-      return bloc;
-    }
-
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
-
 }

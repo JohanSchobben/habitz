@@ -12,10 +12,14 @@ class HabitsBloc extends Bloc {
     _subject.add([..._subject.value, habit]);
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
+  void removeHabit(Habit habit) {
+    var value = _subject.value;
+    var newHabits = value.where((element) => element == habit).toList();
+    _subject.add(newHabits);
   }
 
-  void addHabit() {}
+  @override
+  void dispose() {
+    _subject.close();
+  }
 }
